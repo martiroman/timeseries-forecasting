@@ -18,5 +18,5 @@ jobs:
     
     - name: Build the Docker image
       run: |
-           docker build . --file Dockerfile --platform linux/amd64 --tag $DOCKER_HUB_USERNAME/prom-analysis:latest
-           docker push $DOCKER_HUB_USERNAME/prom-analysis:latest
+           docker build . --file Dockerfile --platform linux/amd64 --tag mnroman/prom-analysis:latest
+           docker push mnroman/prom-analysis:latest
