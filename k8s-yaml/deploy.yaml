@@ -1,7 +1,5 @@
 apiVersion: apps/v1
 kind: Deployment
-namespace:
-  prom-analysis
 metadata:
   name: prom-analysis
 spec:
