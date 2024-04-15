@@ -14,5 +14,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Login to Docker Hub (with secret)
+      run: echo $DOCKER_HUB_USERNAME:$DOCKER_HUB_PASSWORD | docker login --username $DOCKER_HUB_USERNAME --password-stdin
+
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_HUB_USERNAME }}/prom-analysis:latest
+
+    - name: Push the image to Docker Hub
+      run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/prom-analysis:latest
+
+        
