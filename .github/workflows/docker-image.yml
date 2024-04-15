@@ -18,9 +18,8 @@ jobs:
     
     - name: Build the Docker image
       env:
-          DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          DOCKER_HUB_PASSWORD: ${{ DOCKER_HUB_PASSWORD }}
       run: |
-           echo $DOCKER_HUB_PASSWORD
            docker login -u mnroman --password $DOCKER_HUB_PASSWORD
            docker build . --file Dockerfile --platform linux/amd64 --tag mnroman/prom-analysis:latest
            docker push mnroman/prom-analysis:latest 
