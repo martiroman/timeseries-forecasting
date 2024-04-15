@@ -1,3 +1,8 @@
+##
+#   Ejemplo inicial
+#   
+#####
+
 from flask import Flask, render_template
 import io
 import base64
