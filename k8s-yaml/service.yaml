@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+namespace:
+  prom-analysis
+metadata:
+  name: prom-analysis-svc
+  labels:
+    app.kubernetes.io/app: prom-analysis
+spec:
+  selector:
+    app: prom-analysis
+  ports:
+    - port: 80
+      targetPort: 5000
+      name: frontend
+  type: ClusterIP
