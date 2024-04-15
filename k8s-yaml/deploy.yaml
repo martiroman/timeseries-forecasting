@@ -14,8 +14,8 @@ spec:
         app.kubernetes.io/name: prom-analysis
         app.kubernetes.io/component: service
         app.kubernetes.io/part-of: prom-analysis
-        app.kubernetes.io/version: 0.0.2
-        app.kubernetes.io/build-version: "0.0.1"
+        app.kubernetes.io/version: 0.0.3
+        app.kubernetes.io/build-version: "0.0.2"
       annotations:
         instrumentation.opentelemetry.io/inject-nodejs: "true"
         #metrics.dynatrace.com/scrape: 'true'

@@ -1,5 +1,6 @@
 ##
-#   Ejemplo inicial
+#   Ejemplo inicial.
+#   Consulta una metrica en Prometheus y realiza un Forecast
 #   
 #####
 
