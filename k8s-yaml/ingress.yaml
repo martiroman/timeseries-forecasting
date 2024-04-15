@@ -9,7 +9,7 @@ metadata:
   namespace: prom-analysis
 spec:
   rules:
-  - host: prom-analysis
+  - host: prom-analysis.rocketcloud.io
     http:
       paths:
       - backend:
