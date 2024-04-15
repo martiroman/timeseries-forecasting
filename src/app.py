@@ -1,10 +1,6 @@
 from flask import Flask, render_template
-import pandas as pd
 import io
 import base64
-
-import warnings
-warnings.filterwarnings('ignore')
 
 import pandas as pd
 from prometheus_api_client import PrometheusConnect, MetricRangeDataFrame
@@ -14,7 +10,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 import matplotlib.pyplot as plt
 
-PROM_URL = "http://prometheus"
+PROM_URL = "http://10.111.10.149:8080"
 
 app = Flask(__name__)
 
