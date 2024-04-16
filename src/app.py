@@ -1,13 +1,7 @@
-##
-#   Ejemplo inicial.
-#   Consulta una metrica en Prometheus y realiza un Forecast
-#   
-#####
-
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
 import io
 import base64
-
+import json
 import pandas as pd
 from prometheus_api_client import PrometheusConnect, MetricRangeDataFrame
 from prometheus_api_client.utils import parse_datetime
@@ -16,7 +10,8 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 import matplotlib.pyplot as plt
 
-PROM_URL = "http://10.111.10.149:8080"
+#PROM_URL = "http://10.111.10.149:8080"
+PROM_URL = "http://prometheus"
 
 app = Flask(__name__)
 
@@ -35,20 +30,18 @@ def metric_query(labels, start_time, end_time, query):
     return MetricRangeDataFrame(metric_data)
 
 def cargar_datos(labels, start_time, end_time, query):
-    ## 1. Adquisición de Datos
-            
+    ## 1. Adquisición de Datos            
     df_prom = metric_query(labels, start_time, end_time, query)
     
     # 2. Inspeccion y preparacion de los datos
-
     # Seleccionamos las columnas que necesitamos para el analisis
     df = df_prom[['value']].copy()
     df = df.set_index(df_prom.index)
 
     df = df.resample('60T').mean()
 
-    # Normalizacion de datos en GB
-    df['value'] = df['value'] / 1024 / 1024 / 1024
+    # TODO: Normalizacion de datos en GB
+    # df['value'] = df['value'] / 1024 / 1024 / 1024
 
     # Dividir el DF (Metrics Timeseries) en datos de entrenamiento y de test
     ratio = 0.2
@@ -98,7 +91,7 @@ def crear_grafico(df, forecast, confidence_intervals, query, labels):
     )
 
     # Umbral
-    plt.axhline(y=0, color='red', linestyle='--', label='Llenado FS')
+    #plt.axhline(y=0, color='red', linestyle='--', label='Llenado FS')
 
     plt.xlabel('Fecha')
     plt.ylabel(query)
@@ -115,24 +108,58 @@ def crear_grafico(df, forecast, confidence_intervals, query, labels):
     
     return img_url
 
-@app.route('/')
-def index():
-    labels = { 'job' : 'node-exporter', 'instance': '10.44.0.3:9100', 'mountpoint' : '/'}
-    start_time = parse_datetime("3d")
+def obtener_metricas():
+    return promConn.all_metrics()
+
+@app.route('/cargar_labels', methods=['POST'])
+def cargar_labels():
+    selected_value = request.form.get('selected_value')
+    
+    labels = promConn.get_current_metric_value(selected_value)
+    metric_values = [entry['metric'] for entry in labels]
+
+    return jsonify(metric_values)
+
+@app.route('/generar_reporte', methods=['POST'])
+def generar_reporte():
+    metricas = obtener_metricas()
+
+    metrica = request.form.get('opciones-metrica')
+    labelsObj = request.form.get('opciones-labels')
+    labels = json.loads(labelsObj)
+    print(metrica)
+    print(labels)
+    start_time = parse_datetime("2d")
     end_time = parse_datetime("now")
-    query = 'node_filesystem_avail_bytes'
 
     # Cargar datos
-    df, df_test = cargar_datos(labels, start_time, end_time, query)
+    df, df_test = cargar_datos(labels, start_time, end_time, "")
 
     # Modelado
     model, forecast, confidence_intervals = ARIMA(df, 24)
 
     # Grafico
+    img_url = crear_grafico(df, forecast, confidence_intervals, metrica, labels)
+    
+    return render_template('index.html', tables=[df.to_html(classes='data')], titles=df.columns.values, img_url=img_url, valores=metricas)
+
+@app.route('/')
+def index():
+    metricas = obtener_metricas()
+    
+    labels = { 'job' : 'node-exporter', 'instance': '10.44.0.3:9100', 'mountpoint' : '/'}
+    start_time = parse_datetime("2d")
+    end_time = parse_datetime("now")
+    query = 'node_filesystem_avail_bytes'
+
+    df, df_test = cargar_datos(labels, start_time, end_time, query)
+
+    model, forecast, confidence_intervals = ARIMA(df, 24)
+
     img_url = crear_grafico(df, forecast, confidence_intervals, query, labels)
         
     # Renderizar la plantilla y pasar el DataFrame como contexto
-    return render_template('index.html', tables=[df.to_html(classes='data')], titles=df.columns.values, img_url=img_url)
+    return render_template('index.html', tables=[df.to_html(classes='data')], titles=df.columns.values, img_url=img_url, valores=metricas)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

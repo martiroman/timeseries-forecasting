@@ -3,28 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualización de DataFrame</title>
-    <style>
-        table.data {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        table.data th, table.data td {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-        table.data th {
-            background-color: #f2f2f2;
-        }
-    </style>
+    <title>Prometheus Metric Forecasting</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h1>Valores del DataFrame</h1>
+    <div class="header">
+        <img src="https://www.powercloud.com.ar/img/powercloud-light.svg" alt="Logo de PowerCloud">
+    </div>
+
+    <br><br>
+    <form action="/generar_reporte" method="post">
+        <label for="opciones-metrica">Selecciona una métrica:</label>
+        <select id="opciones-metrica" name="opciones-metrica" onchange="cargarLabels()">
+            {% for valor in valores %}
+                <option value="{{ valor }}">{{ valor }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
+        <label for="opciones-labels">Labels:</label>
+        <select id="opciones-labels" name="opciones-labels">
+            <!-- Este combo se llenará dinámicamente con JavaScript -->
+        </select>
+        <br><br>
+        <button type="submit">Seleccionar</button>
+    </form>
+
+    <img src="{{ img_url }}" alt="Gráfico de Matplotlib">
+    <h1>Valores</h1>
     {% for table in tables %}
         {{ table|safe }}
     {% endfor %}
 
-    <img src="{{ img_url }}" alt="Gráfico de Matplotlib">
+    <script>
+        function cargarLabels() {
+            var selectedValue = $('#opciones-metrica').val();
+            $.ajax({
+                url: '/cargar_labels',
+                type: 'POST',
+                data: {'selected_value': selectedValue},
+                success: function(data) {
+                    $('#opciones-labels').empty();
+                    $.each(data, function(index, metric) {
+                        var optionText = JSON.stringify(metric); // Convierte el diccionario a cadena de texto
+                        $('#opciones-labels').append("<option value='" + optionText + "'>" + optionText + "</option>");
+                    });
+                }
+            });
+        }
+    </script>
 </body>
 </html>
