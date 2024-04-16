@@ -10,8 +10,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 import matplotlib.pyplot as plt
 
-#PROM_URL = "http://10.111.10.149:8080"
-PROM_URL = "http://prometheus"
+PROM_URL = "http://10.111.10.149:8080"
 
 app = Flask(__name__)
 
