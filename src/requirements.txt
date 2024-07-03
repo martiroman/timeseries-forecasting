@@ -2,3 +2,4 @@ Flask
 pandas
 prometheus-api-client
 statsmodels
+python-dotenv
