@@ -18,6 +18,6 @@ jobs:
     
     - name: Build the Docker image
       run: |
-           docker login -u mnroman --password ${{ secrets.DOCKER_HUB_PASSWORD }}
-           docker build . --file Dockerfile --platform linux/amd64 --tag mnroman/prom-analysis:latest
-           docker push mnroman/prom-analysis:latest 
+           docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password ${{ secrets.DOCKER_HUB_PASSWORD }}
+           docker build . --file Dockerfile --platform linux/amd64 --tag ${{ secrets.DOCKER_HUB_USERNAME }}/prom-analysis:latest
+           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/prom-analysis:latest 
