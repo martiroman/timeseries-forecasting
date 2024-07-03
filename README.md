@@ -26,7 +26,7 @@ Para configurar la URL de Prometheus, modifica la variable `PROMETHEUS_URL` en e
 
         PROMETHEUS_URL=http://10.111.10.149:8080
         DEBUG=True
-        
+
 ## Uso
 
 1. Inicia la aplicación:
@@ -38,3 +38,10 @@ Para configurar la URL de Prometheus, modifica la variable `PROMETHEUS_URL` en e
 
 3. Selecciona una métrica de Prometheus desde el menú desplegable.
 
+## Modelo ARIMA
+
+ARIMA (Autoregressive Integrated Moving Average) es un modelo estadístico utilizado para analizar y predecir series temporales. Puede ser ajustado a datos históricos para hacer predicciones a futuro, lo que lo hace valioso en pronósticos de variables en distintas disciplinas.
+
+Utilizamos SARIMAX, una extensión del modelo que considera factores externos o variables exógenas.
+
+Doc: https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.sarimax.SARIMAX.html
