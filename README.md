@@ -1,7 +1,8 @@
 # Prometheus Timeseries Metrics Visualizer and Forecaster
 
 This project is a web application written in Python that allows users to select a Prometheus metric, visualize it with a graph, and perform forecasting.
-Installation
+
+### Installation
 
 1. Clone this repository:
     ```bash
@@ -19,14 +20,14 @@ Installation
     ```bash
     pip install -r src/requirements.txt
     ```
-## Configuration
+### Configuration
 
 To configure the Prometheus URL, modify the PROMETHEUS_URL variable in the .env file.
 
         PROMETHEUS_URL=http://10.111.10.149:8080
         DEBUG=True
 
-Usage
+### Usage
 
 1. Start the application:
     ```bash
