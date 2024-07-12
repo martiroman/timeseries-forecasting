@@ -13,7 +13,7 @@
     </div>
 
     <br><br>
-    <form action="/generar_reporte" method="post">
+    <form action="/getReport" method="post">
         <label for="opciones-metrica">Selecciona una métrica:</label>
         <select id="opciones-metrica" name="opciones-metrica" onchange="cargarLabels()">
             {% for valor in valores %}
@@ -39,7 +39,7 @@
         function cargarLabels() {
             var selectedValue = $('#opciones-metrica').val();
             $.ajax({
-                url: '/cargar_labels',
+                url: '/loadLabels',
                 type: 'POST',
                 data: {'selected_value': selectedValue},
                 success: function(data) {

@@ -1,47 +1,46 @@
 # Prometheus Timeseries Metrics Visualizer and Forecaster
 
-Este proyecto es una aplicación web escrita en Python que permite a los usuarios seleccionar una métrica de Prometheus, visualizarla mediante un gráfico y realizar un pronóstico (forecasting).
+This project is a web application written in Python that allows users to select a Prometheus metric, visualize it with a graph, and perform forecasting.
+Installation
 
-## Instalación
-
-1. Clona este repositorio:
+1. Clone this repository:
     ```bash
     git clone https://github.com/martiroman/timeseries-forecasting.git
     cd timeseries-forecasting
     ```
 
-2. Crea un entorno virtual:
+2. Create a virtual environment:
     ```bash
     python -m venv venv
     source venv/bin/activate
     ```
 
-3. Instala las dependencias:
+3. Install the dependencies:
     ```bash
     pip install -r src/requirements.txt
     ```
-## Configuración
+## Configuration
 
-Para configurar la URL de Prometheus, modifica la variable `PROMETHEUS_URL` en el archivo `.env`.
+To configure the Prometheus URL, modify the PROMETHEUS_URL variable in the .env file.
 
         PROMETHEUS_URL=http://10.111.10.149:8080
         DEBUG=True
 
-## Uso
+Usage
 
-1. Inicia la aplicación:
+1. Start the application:
     ```bash
     python src/run.py
     ```
 
-2. Abre tu navegador y ve a `http://localhost:5000`.
+2. Open your browser and go to `http://localhost:5000`.
 
-3. Selecciona una métrica de Prometheus desde el menú desplegable.
+3. Select a Prometheus metric from the dropdown menu.
 
-## Modelo ARIMA
+## ARIMA Model
 
-ARIMA (Autoregressive Integrated Moving Average) es un modelo estadístico utilizado para analizar y predecir series temporales. Puede ser ajustado a datos históricos para hacer predicciones a futuro, lo que lo hace valioso en pronósticos de variables en distintas disciplinas.
+ARIMA (Autoregressive Integrated Moving Average) is a statistical model used to analyze and forecast time series data. It can be fitted to historical data to make future predictions, making it valuable for forecasting variables in various disciplines.
 
-Utilizamos SARIMAX, una extensión del modelo que considera factores externos o variables exógenas.
+We use SARIMAX, an extension of the model that considers external factors or exogenous variables.
 
 Doc: https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.sarimax.SARIMAX.html

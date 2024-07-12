@@ -1,39 +1,98 @@
+"""
+Prometheus Metrics Visualizer and Forecaster
+
+This module provides functionality to interact with a Prometheus server,
+retrieve metrics data, and generate reports and visualizations.
+
+Author: martiroman
+"""
+
 import os
-import io
-import pandas as pd
-import base64
-import matplotlib.pyplot as plt
-
-from prometheus_api_client import PrometheusConnect, MetricRangeDataFrame
+from . import report
 from prometheus_api_client.utils import parse_datetime
-from statsmodels.tsa.statespace.sarimax import SARIMAX
-
+from prometheus_api_client import PrometheusConnect, MetricRangeDataFrame
 
 class PrometheusMetrics:
     def __init__(self) -> None:
+        """
+        Initialize the PrometheusMetrics class.
+        
+        Sets up the Prometheus connection using the URL from the environment variable
+        'PROMETHEUS_URL' or a default value if not set. Also initializes the report module.
+        """
         self.promUrl = os.getenv('PROMETHEUS_URL', 'http://10.111.10.149:8080')
         self.promConn = PrometheusConnect(url=self.promUrl, disable_ssl=True)
+        self.report = report.Report()    
+
+    def get_report(self):
+        return self.report.get_report()
         
+    def generate_report(self, metric, labels, start_time="2d", end_time="now"):
+        """
+        Generate a report for the given metric and labels over the specified time range.
+        
+        Args:
+            metric (str): The name of the metric.
+            labels (dict): The labels to filter the metric data.
+            start_time (str): The start time for the query (default is "2d" for 2 days ago).
+            end_time (str): The end time for the query (default is "now").
+        
+        Returns:
+            Timeseries data (Dataframe)
+            Image URl
+        """
+        df_prom = self.metric_query(labels, parse_datetime(start_time), parse_datetime(end_time), "")
+        df, img_url = self.report.generate_report(df_prom, metric, labels)
+        return df, img_url
+
     def get_current_metric_value(self, value):
+        """
+        Retrieve the current value of a specific metric.
+        
+        Args:
+            value (str): The name of the metric.
+        
+        Returns:
+            The current value of the metric.
+        """
         return self.promConn.get_current_metric_value(value)
 
+    def get_labels(self, metric):
+        """
+        Get the labels for a specific metric.
+        
+        Args:
+            metric (str): The name of the metric.
+        
+        Returns:
+            A list of labels associated with the metric.
+        """
+        labels = self.get_current_metric_value(metric)
+        metric_values = [entry['metric'] for entry in labels]
+        return metric_values
+    
     def get_all_metrics(self):
+        """
+        Retrieve all available metrics from Prometheus.
+        
+        Returns:
+            A list of all available metrics.
+        """
         return self.promConn.all_metrics()
-    
-    def get_report(self, metric, labels, start_time="2d", end_time="now"):
-        start_time = parse_datetime(start_time)
-        end_time = parse_datetime(end_time)
 
-        df, df_test = self.load_data(labels, start_time, end_time, "")
-        model, forecast, confidence_intervals = self.ARIMA(df, 24)
-
-        img_url = self.crear_grafico(df, forecast, confidence_intervals, metric, labels)
-
-        return df, img_url
-    
-
-    # Obtener DF Metrics Timeseries
     def metric_query(self, labels, start_time, end_time, query):
+        """
+        Perform a query to retrieve timeseries data for the given labels and time range.
+        
+        Args:
+            labels (dict): The labels to filter the metric data.
+            start_time (datetime): The start time for the query.
+            end_time (datetime): The end time for the query.
+            query (str): The Prometheus query.
+        
+        Returns:
+            MetricRangeDataFrame: A DataFrame containing the timeseries data.
+        """
         metric_data = self.promConn.get_metric_range_data(
             query,
             label_config=labels,
@@ -41,52 +100,3 @@ class PrometheusMetrics:
             end_time=end_time,
         )
         return MetricRangeDataFrame(metric_data)
-
-    def load_data(self, labels, start_time, end_time, query):
-        df_prom = self.metric_query(labels, start_time, end_time, query)
-        df = df_prom[['value']].copy()
-        df = df.set_index(df_prom.index)
-        df = df.resample('60T').mean()
-
-        ratio = 0.2
-        size = int(len(df) * (1 - float(ratio)))
-        df_train, df_test = df[0:size], df[size:len(df)]
-        return df_train, df_test
-
-    def ARIMA(self, df_datos, steps):
-        p, d, q = 0, 1, 0
-        P, D, Q, m = 0, 1, 1, 12
-        
-        model = SARIMAX(df_datos, order=(p, d, q), seasonal_order=(P, D, Q, m), enforce_stationarity=False, enforce_invertibility=False)
-        results = model.fit(disp=False)
-
-        forecast = results.get_forecast(steps=steps)
-        forecast_values = forecast.predicted_mean
-        confidence_intervals = forecast.conf_int()
-        
-        return results, pd.DataFrame(forecast_values, index=confidence_intervals.index), confidence_intervals
-
-
-    def crear_grafico(self, df, forecast, confidence_intervals, query, labels):
-        plt.figure(figsize=(18, 10))
-        plt.plot(df, label='Datos Históricos')
-        plt.plot(forecast, color='red', label='Pronóstico')
-        plt.fill_between(
-            confidence_intervals.index, 
-            confidence_intervals['lower value'],  
-            confidence_intervals['upper value'], 
-            color='pink', alpha=0.3, label='Intervalo de Confianza'
-        )
-        plt.xlabel('Fecha')
-        plt.ylabel(query)
-        plt.title(labels)
-        plt.legend()
-        plt.grid(True)
-
-        img = io.BytesIO()
-        plt.savefig(img, format='png')
-        img.seek(0)
-        img_base64 = base64.b64encode(img.getvalue()).decode()
-        img_url = f'data:image/png;base64,{img_base64}'
-        
-        return img_url
