@@ -14,7 +14,7 @@ spec:
         app.kubernetes.io/name: prom-analysis
         app.kubernetes.io/component: service
         app.kubernetes.io/part-of: prom-analysis
-        app.kubernetes.io/build-version: "0.0.6"
+        app.kubernetes.io/build-version: "0.0.7"
       annotations:
         instrumentation.opentelemetry.io/inject-python: "true"
     spec:
