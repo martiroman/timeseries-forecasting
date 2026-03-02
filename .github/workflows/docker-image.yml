@@ -4,8 +4,13 @@ name: Docker Image CI
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'k8s-yaml/**'
+      
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - 'k8s-yaml/**'
 
 permissions:
   contents: read
