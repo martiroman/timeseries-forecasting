@@ -6,10 +6,9 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/use-regex: "true"
   name: ingress-prom-analysis
-  namespace: prom-analysis
 spec:
   rules:
-  - host: prom-analysis.io
+  - host: test-app.local
     http:
       paths:
       - backend:
@@ -19,7 +18,3 @@ spec:
               number: 5000
         path: /
         pathType: Prefix
-status:
-  loadBalancer:
-    ingress:
-    - ip: 10.250.1.90
