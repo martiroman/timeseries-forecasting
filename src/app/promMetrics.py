@@ -27,7 +27,7 @@ class PrometheusMetrics:
     def get_report(self):
         return self.report.get_report()
         
-    def generate_report(self, metric, labels, start_time="2d", end_time="now"):
+    def generate_report(self, metric, labels, start_time=None, end_time="now"):
         """
         Generate a report for the given metric and labels over the specified time range.
         
@@ -41,6 +41,10 @@ class PrometheusMetrics:
             Timeseries data (Dataframe)
             Image URl
         """
+        if start_time is None:
+            # Allow runtime configuration of default range
+            start_time = os.getenv('PROM_RANGE_START', '2d')
+
         df_prom = self.metric_query(labels, parse_datetime(start_time), parse_datetime(end_time), "")
         df, img_url = self.report.generate_report(df_prom, metric, labels)
         return df, img_url
