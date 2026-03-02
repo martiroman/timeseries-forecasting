@@ -11,6 +11,7 @@ import os
 from . import report
 from prometheus_api_client.utils import parse_datetime
 from prometheus_api_client import PrometheusConnect, MetricRangeDataFrame
+from .debug_log import debug_log
 
 class PrometheusMetrics:
     def __init__(self) -> None:
@@ -21,7 +22,27 @@ class PrometheusMetrics:
         'PROMETHEUS_URL' or a default value if not set. Also initializes the report module.
         """
         self.promUrl = os.getenv('PROMETHEUS_URL', 'http://10.111.10.149:8080')
-        self.promConn = PrometheusConnect(url=self.promUrl, disable_ssl=True)
+        disable_ssl = os.getenv("PROMETHEUS_DISABLE_SSL", "true").lower() in ("true", "1", "t", "yes", "y")
+        bearer = os.getenv("PROMETHEUS_BEARER_TOKEN", "").strip()
+        headers = {"Authorization": f"Bearer {bearer}"} if bearer else None
+
+        # region agent log
+        debug_log(
+            session_id="716c18",
+            run_id=os.getenv("DEBUG_RUN_ID", "pre-fix"),
+            hypothesis_id="A",
+            location="src/app/promMetrics.py:__init__",
+            message="Init PrometheusConnect with config",
+            data={
+                "prom_url": self.promUrl,
+                "disable_ssl": disable_ssl,
+                "has_bearer_token": bool(bearer),
+                "bearer_token_len": len(bearer),
+            },
+        )
+        # endregion
+
+        self.promConn = PrometheusConnect(url=self.promUrl, headers=headers, disable_ssl=disable_ssl)
         self.report = report.Report()    
 
     def get_report(self):
@@ -82,6 +103,16 @@ class PrometheusMetrics:
         Returns:
             A list of all available metrics.
         """
+        # region agent log
+        debug_log(
+            session_id="716c18",
+            run_id=os.getenv("DEBUG_RUN_ID", "pre-fix"),
+            hypothesis_id="B",
+            location="src/app/promMetrics.py:get_all_metrics",
+            message="Fetching all metrics",
+            data={"prom_url": self.promUrl},
+        )
+        # endregion
         return self.promConn.all_metrics()
 
     def metric_query(self, labels, start_time, end_time, query):
